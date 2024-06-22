@@ -1,33 +1,24 @@
 package com.example.demo.controller;
 
-import com.example.demo.model.LoginDto;
-import com.example.demo.model.LoginResponseDto;
-import com.example.demo.security.jwt.TokenProvider;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
-import java.util.List;
-
-/**
+/*
  * Test login with username and password passed through request body
  */
 @RestController
 public class AuthController {
 
     private AuthenticationManager authManager;
-    private TokenProvider tokenProvider;
 
-    public AuthController(AuthenticationManager authManager, TokenProvider tokenProvider) {
+    public AuthController(AuthenticationManager authManager) {
         this.authManager = authManager;
-        this.tokenProvider = tokenProvider;
     }
 
     @PostMapping("/login")
@@ -47,19 +38,46 @@ public class AuthController {
         Authentication authenticatedUser = this.authManager.authenticate(unauthenticatedUser);
 
         /*
-         * 3. If auth successful, build jwt & then return it in response
+         * 3. If auth successful, build jwt & then return jwt
          */
         if(authenticatedUser.isAuthenticated()){
-
-            String jwt = tokenProvider.createToken(authenticatedUser);
-            String username = authenticatedUser.getName();
-
-            List<GrantedAuthority> roles = new ArrayList<>(authenticatedUser.getAuthorities());
-            String role = roles.size() > 0 ? roles.get(0).getAuthority() : "";
-
-            return new LoginResponseDto(jwt, username, role);
+            /*
+             * TODO: Send JWT token
+             */
+            System.out.println("authenticated");
+            return new LoginResponseDto("JWT sent!!!");
         }
 
         throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+    }
+}
+
+class LoginResponseDto {
+    private String jwt;
+
+    public LoginResponseDto(String jwt) {
+        this.jwt = jwt;
+    }
+
+    public String getJwt() {
+        return jwt;
+    }
+}
+
+class LoginDto {
+    private String username;
+    private String password;
+
+    public LoginDto(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return password;
     }
 }
